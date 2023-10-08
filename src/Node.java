@@ -23,7 +23,7 @@ public class Node {
 
         output = run(inputs);
 
-        error = (z-output) * 0.08;
+        error = (z-output) * 0.1;
 
         for (int i = 0; i < usableInputs.length; i++) {
             weights[usableInputs[i]] += error * inputs[usableInputs[i]];

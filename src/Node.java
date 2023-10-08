@@ -29,7 +29,7 @@ public class Node {
             weights[usableInputs[i]] += error * inputs[usableInputs[i]];
         }   
 
-    }
+    }// end train
 
     public double run(int... inputs) {
 
@@ -43,10 +43,11 @@ public class Node {
 
         return output;
 
-    }
+    }// end run
 
 
     private static double sigmoid(double x) {
         return 1 / (1 + Math.exp(-x));
-    }
+    }// end sigmoid
+    
 }

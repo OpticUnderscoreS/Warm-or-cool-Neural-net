@@ -1,88 +1,178 @@
-
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.OptionalDouble;
 
 public class NeuralNet {
 
     private int inputs;
+    public static double alpha = 1;
 
     private ArrayList<Node> nodes;
+    private Data data;
+
+    public void printNodeWeights() {
+        for (int i = 0; i < nodes.size(); i++) {
+            System.out.print(i + " - ");
+            nodes.get(i).printWeights();
+        }
+    }
     
-    public NeuralNet(int inputs) {
+    public NeuralNet(int inputs, Data data) {
         this.inputs = inputs;
         nodes = new ArrayList<>();
+        this.data = data;
     }
 
     public void createNode(int... inputNums) {
         nodes.add(new Node(inputNums));
     }
 
-    public String predict(int... inputs) {
+    public int predict(double... inputs) {
 
-        double output = nodes.get(0).run(inputs);
-        //System.out.println(output);
+        double[] outputs = new double[nodes.size()];
 
-        return (output > 0.5) ? "Warm" : "Cool";
+        for (int i = 0; i < nodes.size(); i++) {
+            outputs[i] = nodes.get(i).run(inputs);
+            //System.out.println(outputs[i]);
+        }
+        
+        return (outputs[0] > outputs[1]) ? 0 : 1;
 
+    }
+
+    public static double[] oneHot(int index, int size) {
+
+        double[] temp = new double[size];
+
+        for (int i = 0; i < size; i++) {
+            temp[i] = (i == index) ? 1 : 0;
+        }
+
+        return temp;
     }
 
     public void train() {
 
+        double[] A1;
+        double[] Z1;
+        double[] dZ1;
+        double[][] dW1;
+        double db1;
+        double[] X;
+
+        double m = nodes.size();
+        int size = nodes.size();
+
         // Get data
-        File trainingSet;
-        BufferedReader reader;
-        ArrayList<int[]> rgb = new ArrayList<>();
-        ArrayList<Integer> outcomes = new ArrayList<>();
-
-        String[] trainingBits;
         
-        String[] values;
-        String outcome;
-
-        System.out.println(Paths.get("").toAbsolutePath().toString());
-
-        trainingSet = new File(Paths.get("").toAbsolutePath().toString() + "\\src\\data\\TrainingSet.txt");
-
-        try {
-            reader = new BufferedReader(new FileReader(trainingSet));
-
-            trainingBits = reader.readLine().split(";");
-
-            for (String d:trainingBits) {
-
-                values = d.split(":")[0].split(",");
-                outcome = d.split(":")[1];
-
-                rgb.add(new int[] {
-                    
-                    Integer.parseInt(values[0]),
-                    Integer.parseInt(values[1]),
-                    Integer.parseInt(values[2])
- 
-                });
-
-                outcomes.add(Integer.parseInt(outcome));
-
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        double[] oneHot;
 
         // Use data
+        
+        for (int i = 0; i < data.outcomes.size(); i++) {
 
-        for (int i = 0; i < outcomes.size(); i++) {
-            nodes.get(0).train(outcomes.get(i), rgb.get(i));
+            X = data.rgb.get(i);
+
+            oneHot = oneHot(data.outcomes.get(i), size);
+
+            Z1 = new double[size];
+            
+            for (int j = 0; j < size; j++) {
+                
+                Z1[j] = nodes.get(j).run(X);
+                //System.out.println(String.format("Z1: %s", Z1[j]));
+            }
+            
+            A1 = softmax(Z1);
+            dZ1 = new double[A1.length];
+            //System.out.println(size + " " + A1.length);
+            dW1 = new double[size][X.length];
+
+            for (int j = 0; j < A1.length; j++) {
+                   
+                dZ1[j] = A1[j] - oneHot[j];
+                
+            }
+
+            //System.out.println(A1[j] - oneHot[j]);
+            for (int j = 0; j < size; j++) {
+                for (int ii = 0; ii < X.length; ii++) {
+                    dW1[j][ii] = (1/m) * dZ1[j] * X[ii]; 
+                }
+            }
+
+            db1 = (1/m) * sum(dZ1);
+
+            for (int j = 0; j < size; j++) {
+                nodes.get(j).adjustWeights(dW1[j], db1);
+            }
+
         }
 
+    }
+    
+    
+
+    public double[] softmax(double[] Z) {
+
+        //fix
+
+        double maxZ = Arrays.stream(Z).max().getAsDouble();
+
+        for (int i = 0; i < Z.length; i++) {
+            Z[i] -= maxZ;
+        }
+
+        double[] sm = new double[Z.length];
+        double normalizationTerm = 0;
+
+        normalizationTerm = Arrays.stream(Z).map(Math::exp).sum();
+        
+
+        for (int j = 0; j < nodes.size(); j++) {
+           
+            sm[j] = Math.exp(Z[j]) / normalizationTerm;
+            
+        }
+
+        return sm;
+    }
+
+    
+
+    public double test() {
+        double tested = 0;
+        double correct = 0;
+
+        int predict;
+        int outcome;
+
+        Data d = new Data("\\src\\data\\TestingSet.txt");
+
+        for (int i = 0; i < d.outcomes.size(); i++) {
+            tested++;
+            predict = predict(d.rgb.get(i));
+            outcome = d.outcomes.get(i);
+
+            if (predict == outcome) {
+                //System.out.println(predict);
+                //System.out.print(outcome);
+                correct++;
+            }
+            
+        }
+
+        return (correct/tested) * 100;
+    }
+
+    private static double sum(double[] arr) {
+        double temp = 0;
+        for (double num:arr) {
+            temp += num;
+        }
+
+        return temp;
     }
 
 }

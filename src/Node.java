@@ -4,6 +4,16 @@ public class Node {
     
     private int[] usableInputs;
     private double[] weights;
+    public double bias;
+
+    public void printWeights() {
+        String[] weightsReadable = new String[3];
+        for (int i = 0; i < 3; i++) {
+            weightsReadable[i] = TextTools.DF.format(weights[i]);
+        }
+        System.out.printf("R: %s , G: %s , B: %s", weightsReadable[0], weightsReadable[1], weightsReadable[2]);
+        System.out.println();
+    }
 
     public Node(int[] usableInputs) {
 
@@ -13,40 +23,30 @@ public class Node {
         for (int i = 0; i < usableInputs.length; i++) {
             weights[i] = Math.random();
         }
+        bias = Math.random();
 
     }//end constructor
 
-    public void train(int z, int... inputs) {
-        
-        double output;
-        double error;
+    protected void adjustWeights(double[] dW, double db) {
 
-        output = run(inputs);
+        for (int i = 0; i < weights.length; i++) {
+            weights[i] -= dW[i] * NeuralNet.alpha;
+        }
 
-        error = (z-output) * 0.1;
-
-        for (int i = 0; i < usableInputs.length; i++) {
-            weights[usableInputs[i]] += error * inputs[usableInputs[i]];
-        }   
-
+        bias -= NeuralNet.alpha * db;
     }
 
-    public double run(int... inputs) {
+    public double run(double... inputs) {
 
         double output = 0;
 
         for (int i = 0; i < usableInputs.length; i++) {
             output += inputs[usableInputs[i]] * weights[i];
+            //System.out.println(String.format("inputs: %s ; weights: %s ; output: %s", inputs[usableInputs[i]], weights[i], output));
         } 
 
-        output = sigmoid(output);
-
-        return output;
+        return output + bias;
 
     }
 
-
-    private static double sigmoid(double x) {
-        return 1 / (1 + Math.exp(-x));
-    }
 }

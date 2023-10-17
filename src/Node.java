@@ -34,7 +34,7 @@ public class Node {
         }
 
         bias -= NeuralNet.alpha * db;
-    }
+    }// end train
 
     public double run(double... inputs) {
 
@@ -47,6 +47,10 @@ public class Node {
 
         return output + bias;
 
-    }
+    }// end run
 
+
+    private static double sigmoid(double x) {
+        return 1 / (1 + Math.exp(-x));
+    }
 }

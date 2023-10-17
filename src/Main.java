@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        nn  = new NeuralNet(3, new Data("\\src\\data\\TrainingSet.txt"));
+        nn  = new NeuralNet(3, new Data("\\src\\data\\DataSet.txt"));
         nn.createNode(0, 1, 2);
         nn.createNode(0, 1, 2);
 
@@ -32,7 +32,7 @@ public class Main {
         System.out.println(TextTools.BFTT + "Weights BEFORE Training" + TextTools.BFTD);
         nn.printNodeWeights();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             nn.train();
         }
 
@@ -90,7 +90,7 @@ public class Main {
 
         // Save data
 
-        File trainingData = new File (Paths.get("").toAbsolutePath().toString() + "\\src\\data\\TrainingSet.txt");
+        File trainingData = new File (Paths.get("").toAbsolutePath().toString() + "\\src\\data\\DataSet.txt");
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(trainingData, true));
             writer.append(data);

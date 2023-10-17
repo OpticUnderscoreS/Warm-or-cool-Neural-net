@@ -8,27 +8,51 @@ import java.util.ArrayList;
 
 public class Data {
 
-    public ArrayList<double[]> rgb = new ArrayList<>();
-    public ArrayList<Integer> outcomes = new ArrayList<>();
+    public ArrayList<double[]> data_X = new ArrayList<>();
+    public ArrayList<Integer> data_Y = new ArrayList<>();
+
+    public ArrayList<double[]> train_X;
+    public ArrayList<Integer> train_Y;
+
+    public ArrayList<double[]> test_X;
+    public ArrayList<Integer> test_Y;
     
     public Data(String data, String fileName) {
-        initTrainingData(fileName);
-        storeTrainingData(data);
+        getDataFromFile(fileName);
+        storeData(data);
+        initData();
     }
 
     public Data(String fileName) {
-        initTrainingData(fileName);
+        getDataFromFile(fileName);
+        initData();
     }
 
     private Data() {}
 
+    private void initData() {
+        int size = data_X.size();
+
+        int[] trainingPartition = new int[] {0, size*4/5};
+        int[] testingPartition = new int[] {trainingPartition[1], size};
+
+        train_X = new ArrayList<double[]>(data_X.subList(trainingPartition[0], trainingPartition[1]));
+        train_Y = new ArrayList<Integer>(data_Y.subList(trainingPartition[0], trainingPartition[1]));
+
+        test_X = new ArrayList<double[]>(data_X.subList(testingPartition[0], testingPartition[1]));
+        test_Y = new ArrayList<Integer>(data_Y.subList(testingPartition[0], testingPartition[1]));
+        //System.out.println(train_X.size());
+        //System.out.println(test_X.size());
+    }
+
     public static Data createBlank(String data) {
         Data temp = new Data();
-        temp.storeTrainingData(data);
+        temp.storeData(data);
+        temp.initData();
         return temp;
     }
 
-    private void storeTrainingData(String data) {
+    private void storeData(String data) {
 
         String[] values;
         String outcome;
@@ -40,7 +64,7 @@ public class Data {
             values = d.split(":")[0].split(",");
             outcome = d.split(":")[1];
 
-            rgb.add(new double[] {
+            data_X.add(new double[] {
                 
                 Integer.parseInt(values[0]),
                 Integer.parseInt(values[1]),
@@ -48,13 +72,13 @@ public class Data {
 
             });
 
-            outcomes.add(Integer.parseInt(outcome));
+            data_Y.add(Integer.parseInt(outcome));
 
         }
 
     }
 
-    private void initTrainingData(String fileName) {
+    private void getDataFromFile(String fileName) {
 
         File trainingSet;
         BufferedReader reader;
@@ -68,7 +92,7 @@ public class Data {
 
             data = reader.readLine();
 
-            storeTrainingData(data);
+            storeData(data);
             
 
         } catch (FileNotFoundException e) {

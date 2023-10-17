@@ -6,7 +6,7 @@ import java.util.OptionalDouble;
 public class NeuralNet {
 
     private int inputs;
-    public static double alpha = 1;
+    public static double alpha = 0.1;
 
     private ArrayList<Node> nodes;
     private Data data;
@@ -70,11 +70,11 @@ public class NeuralNet {
 
         // Use data
         
-        for (int i = 0; i < data.outcomes.size(); i++) {
+        for (int i = 0; i < data.train_Y.size(); i++) {
 
-            X = data.rgb.get(i);
+            X = data.train_X.get(i);
 
-            oneHot = oneHot(data.outcomes.get(i), size);
+            oneHot = oneHot(data.train_Y.get(i), size);
 
             Z1 = new double[size];
             
@@ -148,12 +148,10 @@ public class NeuralNet {
         int predict;
         int outcome;
 
-        Data d = new Data("\\src\\data\\TestingSet.txt");
-
-        for (int i = 0; i < d.outcomes.size(); i++) {
+        for (int i = 0; i < data.test_Y.size(); i++) {
             tested++;
-            predict = predict(d.rgb.get(i));
-            outcome = d.outcomes.get(i);
+            predict = predict(data.test_X.get(i));
+            outcome = data.test_Y.get(i);
 
             if (predict == outcome) {
                 //System.out.println(predict);

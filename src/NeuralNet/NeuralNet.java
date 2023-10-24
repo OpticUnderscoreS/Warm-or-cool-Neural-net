@@ -1,3 +1,5 @@
+package NeuralNet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -5,30 +7,33 @@ import java.util.OptionalDouble;
 
 public class NeuralNet {
 
-    private int inputs;
-    public static double alpha = 0.1;
+    private static int inputs;
+    public static double alpha = 0.05;
 
-    private ArrayList<Node> nodes;
-    private Data data;
+    public static ArrayList<Node> nodes;
+    public static Data data;
 
-    public void printNodeWeights() {
-        for (int i = 0; i < nodes.size(); i++) {
-            System.out.print(i + " - ");
-            nodes.get(i).printWeights();
-        }
-    }
-    
-    public NeuralNet(int inputs, Data data) {
-        this.inputs = inputs;
+    public static void initRawNeuralNet() {
+        inputs = 3;
         nodes = new ArrayList<>();
-        this.data = data;
+        data = new Data();
     }
 
-    public void createNode(int... inputNums) {
+    public static void initNeuralNet() {
+        inputs = 3;
+        nodes = new ArrayList<>();
+        data = new Data("\\src\\data\\DataSet.txt");
+    }
+
+    public static void addData(double[] x, int y) {
+        data.addData(x, y);
+    }
+
+    public static void createNode(int... inputNums) {
         nodes.add(new Node(inputNums));
     }
 
-    public int predict(double... inputs) {
+    public static int predict(double... inputs) {
 
         double[] outputs = new double[nodes.size()];
 
@@ -52,7 +57,13 @@ public class NeuralNet {
         return temp;
     }
 
-    public void train() {
+    public static void reset() {
+        nodes.stream().forEach(Node::resetWeights);
+        data.randomizeData();
+        data.partitionData();
+    }
+ 
+    public static void train() {
 
         double[] A1;
         double[] Z1;
@@ -70,11 +81,11 @@ public class NeuralNet {
 
         // Use data
         
-        for (int i = 0; i < data.train_Y.size(); i++) {
+        for (int i = 0; i < data.train.size(); i++) {
 
-            X = data.train_X.get(i);
+            X = data.train.get(i).getX();
 
-            oneHot = oneHot(data.train_Y.get(i), size);
+            oneHot = oneHot(data.train.get(i).getY(), size);
 
             Z1 = new double[size];
             
@@ -112,9 +123,14 @@ public class NeuralNet {
 
     }
     
-    
+    public static void printNodeWeights() {
+        for (int i = 0; i < nodes.size(); i++) {
+            System.out.print(i + " - ");
+            nodes.get(i).printWeights();
+        }
+    }
 
-    public double[] softmax(double[] Z) {
+    public static double[] softmax(double[] Z) {
 
         //fix
 
@@ -139,19 +155,27 @@ public class NeuralNet {
         return sm;
     }
 
-    
+    private static double test(int amtLeft, double percent) {
+        
+        if (amtLeft == 0) {
+            return percent;
+        }
 
-    public double test() {
+        reset();
+        train();
+
+        amtLeft--;
+
         double tested = 0;
         double correct = 0;
 
         int predict;
         int outcome;
 
-        for (int i = 0; i < data.test_Y.size(); i++) {
+        for (int i = 0; i < data.test.size(); i++) {
             tested++;
-            predict = predict(data.test_X.get(i));
-            outcome = data.test_Y.get(i);
+            predict = predict(data.test.get(i).getX());
+            outcome = data.test.get(i).getY();
 
             if (predict == outcome) {
                 //System.out.println(predict);
@@ -161,7 +185,14 @@ public class NeuralNet {
             
         }
 
-        return (correct/tested) * 100;
+        return test(amtLeft, (correct/tested) + percent);
+        
+    }
+
+    public static double test(int amt) {
+
+        return 100*test(amt, 0)/amt;
+        
     }
 
     private static double sum(double[] arr) {

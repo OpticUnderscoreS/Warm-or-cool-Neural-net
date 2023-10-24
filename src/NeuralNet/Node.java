@@ -1,10 +1,25 @@
+package NeuralNet;
 
+import Tools.TextTools;
 
 public class Node {
     
     private int[] usableInputs;
     private double[] weights;
+    public double[] getWeights() {
+        return weights;
+    }
+
+
     public double bias;
+
+    protected void resetWeights() {
+        weights = new double[usableInputs.length];
+
+        for (int i = 0; i < usableInputs.length; i++) {
+            weights[i] = Math.random();
+        }
+    }
 
     public void printWeights() {
         String[] weightsReadable = new String[3];
@@ -18,11 +33,7 @@ public class Node {
     public Node(int[] usableInputs) {
 
         this.usableInputs = usableInputs;
-        weights = new double[usableInputs.length];
-
-        for (int i = 0; i < usableInputs.length; i++) {
-            weights[i] = Math.random();
-        }
+        resetWeights();
         bias = Math.random();
 
     }//end constructor

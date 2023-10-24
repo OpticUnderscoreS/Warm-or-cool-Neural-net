@@ -6,17 +6,24 @@ import java.nio.file.Paths;
 import java.util.Random;
 import java.util.Scanner;
 
+import NeuralNet.Data;
+import NeuralNet.NeuralNet;
+import Tools.TextTools;
+import graphics.GraphicsManager;
+
 public class Main {
 
-    static NeuralNet nn;
     static Random randomGen = new Random();
     static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) throws Exception {
 
-        nn  = new NeuralNet(3, new Data("\\src\\data\\DataSet.txt"));
-        nn.createNode(0, 1, 2);
-        nn.createNode(0, 1, 2);
+        NeuralNet.initRawNeuralNet();
+
+        GraphicsManager.initGraphicsManager();
+
+        NeuralNet.createNode(0, 1, 2);
+        NeuralNet.createNode(0, 1, 2);
 
         System.out.println("[0] Use\n[1] Train");
         if (input.nextLine().startsWith("0")) {
@@ -30,20 +37,20 @@ public class Main {
     public static void useAI() {
 
         System.out.println(TextTools.BFTT + "Weights BEFORE Training" + TextTools.BFTD);
-        nn.printNodeWeights();
+        NeuralNet.printNodeWeights();
 
         for (int i = 0; i < 100; i++) {
-            nn.train();
+            NeuralNet.train();
         }
 
         System.out.println();
         System.out.println(TextTools.AFTT + "Weights AFTER Training" + TextTools.AFTD);
 
-        nn.printNodeWeights();
+        NeuralNet.printNodeWeights();
 
         System.out.println(TextTools.BLUE + "Accuracy:");
 
-        System.out.println(nn.test());
+        System.out.println(NeuralNet.test(1));
         System.out.print(TextTools.RESET);
 
         for (int i = 0; i < 0; i++) {
@@ -82,7 +89,7 @@ public class Main {
                     data += String.format("%s,%s,%s:1;", rgb[0], rgb[1], rgb[2]);
                     break;
                 case "t":
-                    test(data);
+                    //test(data);
                     break;
             }
  
@@ -101,7 +108,7 @@ public class Main {
         }
 
     }
-
+    /*
     public static void test(String data) {
         int amt = 50;
         double outputs = 0;
@@ -120,6 +127,7 @@ public class Main {
         System.out.println(outputs/amt);
 
     }
+    */
 
     public static void test1() {
         int[] rgb = new int[] {
@@ -128,7 +136,7 @@ public class Main {
             randomGen.nextInt(255)
         };
         System.out.printf("\033[48;2;%s;%s;%sm  \033[0m", rgb[0], rgb[1], rgb[2]);
-        System.out.print(" is " + nn.predict(rgb[0], rgb[1], rgb[2]) + "!");
+        System.out.print(" is " + NeuralNet.predict(rgb[0], rgb[1], rgb[2]) + "!");
         System.out.println();
     }
 

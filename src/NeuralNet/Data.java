@@ -1,3 +1,5 @@
+package NeuralNet;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -5,17 +7,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class Data {
 
-    public ArrayList<double[]> data_X = new ArrayList<>();
-    public ArrayList<Integer> data_Y = new ArrayList<>();
+    public ArrayList<DataSample> data = new ArrayList<>();
 
-    public ArrayList<double[]> train_X;
-    public ArrayList<Integer> train_Y;
+    public ArrayList<DataSample> train;
 
-    public ArrayList<double[]> test_X;
-    public ArrayList<Integer> test_Y;
+    public ArrayList<DataSample> test;
     
     public Data(String data, String fileName) {
         getDataFromFile(fileName);
@@ -28,19 +29,33 @@ public class Data {
         initData();
     }
 
-    private Data() {}
+    public Data() {}
 
-    private void initData() {
-        int size = data_X.size();
+    public void addData(double[] x, int y) {
+
+        data.add(new DataSample(x, y));
+
+    }
+
+    public void randomizeData() {
+        Collections.shuffle(data);
+    }
+
+    public void partitionData() {
+        
+        int size = data.size();
 
         int[] trainingPartition = new int[] {0, size*4/5};
         int[] testingPartition = new int[] {trainingPartition[1], size};
 
-        train_X = new ArrayList<double[]>(data_X.subList(trainingPartition[0], trainingPartition[1]));
-        train_Y = new ArrayList<Integer>(data_Y.subList(trainingPartition[0], trainingPartition[1]));
+        train = new ArrayList<DataSample>(data.subList(trainingPartition[0], trainingPartition[1]));
 
-        test_X = new ArrayList<double[]>(data_X.subList(testingPartition[0], testingPartition[1]));
-        test_Y = new ArrayList<Integer>(data_Y.subList(testingPartition[0], testingPartition[1]));
+        test = new ArrayList<DataSample>(data.subList(testingPartition[0], testingPartition[1]));
+
+    }
+
+    private void initData() {
+        partitionData();
         //System.out.println(train_X.size());
         //System.out.println(test_X.size());
     }
@@ -64,15 +79,16 @@ public class Data {
             values = d.split(":")[0].split(",");
             outcome = d.split(":")[1];
 
-            data_X.add(new double[] {
+            double[] x = new double[] {
                 
                 Integer.parseInt(values[0]),
                 Integer.parseInt(values[1]),
                 Integer.parseInt(values[2])
 
-            });
+            };
+            int y = Integer.parseInt(outcome);
 
-            data_Y.add(Integer.parseInt(outcome));
+            this.data.add(new DataSample(x, y));
 
         }
 

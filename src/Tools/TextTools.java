@@ -1,3 +1,4 @@
+package Tools;
 import java.text.DecimalFormat;
 
 public class TextTools {
